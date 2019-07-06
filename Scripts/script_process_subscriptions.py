@@ -39,7 +39,6 @@ def run_script():
     for new_message in reddit.inbox.unread(limit=None):
         unread_messages.append(new_message)
 
-        #TODO elif Remove subscription
         if new_message.subject == "New subscription":
             manage_new_subscription(new_message)
         else:

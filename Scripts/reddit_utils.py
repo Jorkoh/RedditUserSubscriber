@@ -13,3 +13,20 @@ def reddit_login():
 
     print("Logged into Reddit!")
     return reddit
+
+
+def shorten_comment_permalink(permalink):
+    # Some elements of the permalink can be safely removed to keep the DM below the 10k character limit
+    elements = permalink.split('/')
+    del elements[0]
+    del elements[-1]
+    elements[-2] = ""
+    return '/'.join(elements)
+
+
+def shorten_submission_permalink(permalink):
+    # Some elements of the permalink can be safely removed to keep the DM below the 10k character limit
+    elements = permalink.split('/')
+    del elements[0]
+    del elements[-1]
+    return '/'.join(elements)

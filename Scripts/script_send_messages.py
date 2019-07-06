@@ -4,8 +4,9 @@ from itertools import groupby
 
 from Scripts import reddit_utils, mongodb_utils
 
-# TODO: Include posts
 # TODO: Test on Heroku
+# TODO: DM handling for removing subscriptions, checking subscription
+# TODO: Documentation
 
 activity_age_days = int(os.environ["activity_age_days"])
 
@@ -14,28 +15,26 @@ def get_minimum_utc():
     return (datetime.now() - timedelta(days=activity_age_days)).timestamp()
 
 
-def comment_passes_filters(comment, subreddits):
-    return comment.subreddit.display_name in subreddits
-
-
 def get_comments_from_redditor(redditor, subreddits, minimum_utc):
     redditor_comments = []
-    for comment in [comment for comment in redditor.comments.new(limit=None)]:
+    for comment in redditor.comments.new(limit=None):
         # Messages are ordered by post datetime from most recent, when minimum is reached ignore the rest
         if comment.created_utc < minimum_utc:
             break
-        if comment_passes_filters(comment, subreddits):
+        if comment.subreddit.display_name in subreddits:
             redditor_comments.append(comment)
     return redditor_comments
 
 
-def shorten_comment_permalink(permalink):
-    # Some elements of the permalink can be safely removed to keep the DM below the 10k character limit
-    elements = permalink.split('/')
-    del elements[0]
-    del elements[-1]
-    elements[-2] = ""
-    return '/'.join(elements)
+def get_submissions_from_redditor(redditor, subreddits, minimum_utc):
+    redditor_submissions = []
+    for submission in redditor.submissions.new(limit=None):
+        # Messages are ordered by post datetime from most recent, when minimum is reached ignore the rest
+        if submission.created_utc < minimum_utc:
+            break
+        if submission.subreddit.display_name in subreddits:
+            redditor_submissions.append(submission)
+    return redditor_submissions
 
 
 def compose_message(redditors_and_comments):
@@ -43,13 +42,24 @@ def compose_message(redditors_and_comments):
     for redditor_and_comments in redditors_and_comments:
         redditor = redditor_and_comments[0]
         comments = redditor_and_comments[1]
-        if len(comments) > 0:
-            message += f"**{redditor}** activity:"
-            for comment in comments:
-                message += f"\n\n* {shorten_comment_permalink(comment.permalink)}"
+        submissions = redditor_and_comments[2]
+        # Composing submissions
+        if len(submissions) > 0:
+            message += f"**{redditor}** posts:"
+            for submission in submissions:
+                message += f"\n\n* {reddit_utils.shorten_submission_permalink(submission.permalink)}"
             message += "\n\n"
         else:
             message += f"**{redditor}** has not posted.\n\n"
+        # Composing comments
+        if len(comments) > 0:
+            message += f"**{redditor}** comments:"
+            for comment in comments:
+                message += f"\n\n* {reddit_utils.shorten_comment_permalink(comment.permalink)}"
+            message += "\n\n"
+        else:
+            message += f"**{redditor}** has not commented.\n\n"
+        message += "---\n\n"
     return message
 
 
@@ -57,12 +67,14 @@ def run_script():
     minimum_utc = get_minimum_utc()
 
     for user in mongodb_utils.get_users(db):
-        redditors_and_comments = []
+        redditors_activity = []
         for redditor_username, subscriptions in groupby(user['subscriptions'], key=lambda x: x['username']):
             redditor = reddit.redditor(redditor_username)
             subreddits = [subscription['subreddit'] for subscription in subscriptions]
-            redditors_and_comments.append((redditor, get_comments_from_redditor(redditor, subreddits, minimum_utc)))
-        message = compose_message(redditors_and_comments)
+            redditors_activity.append((redditor,
+                                       get_comments_from_redditor(redditor, subreddits, minimum_utc),
+                                       get_submissions_from_redditor(redditor, subreddits, minimum_utc)))
+        message = compose_message(redditors_activity)
         destination = reddit.redditor(user['username'])
         destination.message(f"Subscribed redditors activity the last {activity_age_days} day(s)", message)
 
