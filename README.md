@@ -1,4 +1,4 @@
-﻿# Reddit User Subscriber
+# Reddit User Subscriber
 
 Are you interested in a particular redditor contributions to a certain subreddit but don't care about what they have to say in others? Me too, that's why I made this bot.
 
@@ -10,22 +10,8 @@ With this bot you can subscribe to multiple redditors of a subreddit and recieve
 
 # Available commands
 
-To interact with the bot just send him a direct private message from your reddit account:
+You can interact with the bot by sending him a DM. If you are logged into Reddit clicking the command name will compose the message automatically:
 
-* [Check current subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Check+subscriptions&message=.)
-
-<a href="https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Check+subscriptions&message=.">
-    <img alt="Check subscriptions" title="Check subscriptions" src="/readme-resources/CheckSubscriptions.png" width="400">
-</a>
-  
-* [Add subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Add+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3)
-  
-<a href="https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Add+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3">
-    <img alt="Add subscriptions" title="Add subscriptions" src="/readme-resources/AddSubscriptions.png" width="400">
-</a>
-
-* [Remove subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Remove+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3)
-  
-<a href="https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Remove+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3">
-    <img alt="Remove subscriptions" title="Remove subscriptions" src="/readme-resources/RemoveSubscriptions.png" width="400">
-</a>
+| [Check current subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Check+subscriptions&message=.)  | [Add subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Add+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3) | [Remove subscriptions](https://www.reddit.com/message/compose/?to=UserSubscriberBot&subject=Remove+subscriptions&message=Subreddit:+ExampleSubreddit%0ARedditors:+ExampleRedditor1,+ExampleRedditor2,+ExampleRedditor3) |
+| ------------- | ------------- | ------------- |
+| ![CheckSubscriptions](/readme-resources/CheckSubscriptions.png)  | ![AddSubscriptions](/readme-resources/AddSubscriptions.png) | ![RemoveSubscriptions](/readme-resources/RemoveSubscriptions.png) |
