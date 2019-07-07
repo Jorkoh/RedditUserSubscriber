@@ -1,4 +1,7 @@
-# Reddit User Subscriber
+﻿<h1 align="center"> Reddit User Subscriber BOT </h1> <br>
+<p align="center">
+    <img alt="Reddit Icon" title="Reddit Icon" src="/readme-resources/RedditIcon.png" width="256">
+</p>
 
 Are you interested in a particular redditor contributions to a certain subreddit but don't care about what they have to say in others? Me too, that's why I made this bot.
 
@@ -58,12 +61,9 @@ Heroku > Select your App > Resources > Add-ons > access mLab MongoDB > Add colle
    * **PASSWORD**. The password of the Reddit account.
    * **CLIENT_ID**. The client ID is the 14 character string listed just under “personal use script” on the Reddit application.
    * **CLIENT_SECRET**. The client secret is the 27 character string listed adjacent to secret on the Reddit application.
-   * **SEND_PERIOD_DAYS**. Integer, will be how often the subscription feeds are sent. For example choose "3" if you would like to receive the DM every three days.
+   * **SEND_PERIOD_DAYS**. Integer, how often the subscription feeds are sent. Choose "3" if you would like to receive the DM every three days.
    * **MONGODB_URI**. This one should already exist, don't touch it.
 
-10. Configure the schedulers that will run the scripts:
-```
-Heroku > Select your App > Resources > Add-ons > access Heroku Scheduler > Create job
-```
-   * Create one with the command "*python Scripts/script_process_requests.py*" running every 10 mins, hourly or daily. The more frequently it runs the faster the bot will respond to DMs but you risk running out of free dyno hours on Heroku. This won't be a problem if this is your only app on the Heroku account.
-   * Create another with the command "*python Scripts/script_send_feeds.py*" running daily. It won't actually send feeds every day, don't worry.
+10. Configure the schedulers that will run the scripts on the scheduler add-on:
+    * Create one with the command "*python Scripts/script_process_requests.py*" running every 10 mins, hourly or daily. The more     frequently it runs the faster the bot will respond to DMs but you risk running out of free dyno hours on Heroku. This won't be a problem if this is your only app on the Heroku account.
+    * Create another with the command "*python Scripts/script_send_feeds.py*" running daily. It won't actually send feeds every day, don't worry.
