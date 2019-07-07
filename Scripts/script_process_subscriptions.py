@@ -1,6 +1,3 @@
-import os
-from datetime import datetime, timedelta
-
 from Scripts import reddit_utils, mongodb_utils
 
 
@@ -22,7 +19,6 @@ def manage_add_subscriptions(message):
         username = message.author.name
 
         lines = message.body.split("\n")
-        # Add validations for subreddit and redditors
         subreddit = lines[0][11:]
         redditors = lines[1][11:].split(', ')
 

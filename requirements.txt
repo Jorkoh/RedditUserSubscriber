@@ -1,3 +1,4 @@
+prawcore
 bson
 pymongo
 praw

@@ -1,38 +1,15 @@
 import os
 from datetime import datetime, timedelta
 from itertools import groupby
+from prawcore.exceptions import NotFound
 
 from Scripts import reddit_utils, mongodb_utils
 
-# TODO: Test on Heroku
-
-activity_age_days = int(os.environ["activity_age_days"])
+ACTIVITY_AGE_DAYS = int(os.environ["activity_age_days"])
 
 
 def get_minimum_utc():
-    return (datetime.now() - timedelta(days=activity_age_days)).timestamp()
-
-
-def get_comments_from_redditor(redditor, subreddits, minimum_utc):
-    redditor_comments = []
-    for comment in redditor.comments.new(limit=None):
-        # Messages are ordered by post datetime from most recent, when minimum is reached ignore the rest
-        if comment.created_utc < minimum_utc:
-            break
-        if comment.subreddit.display_name in subreddits:
-            redditor_comments.append(comment)
-    return redditor_comments
-
-
-def get_submissions_from_redditor(redditor, subreddits, minimum_utc):
-    redditor_submissions = []
-    for submission in redditor.submissions.new(limit=None):
-        # Messages are ordered by post datetime from most recent, when minimum is reached ignore the rest
-        if submission.created_utc < minimum_utc:
-            break
-        if submission.subreddit.display_name in subreddits:
-            redditor_submissions.append(submission)
-    return redditor_submissions
+    return (datetime.now() - timedelta(days=ACTIVITY_AGE_DAYS)).timestamp()
 
 
 def compose_message(redditors_and_comments):
@@ -61,20 +38,37 @@ def compose_message(redditors_and_comments):
     return message
 
 
+def send_message(redditors_activity, subscription_removed, username):
+    message = compose_message(redditors_activity)
+    if subscription_removed:
+        message += "One or more subscriptions have been removed because the redditor doesn't exist."
+    destination = reddit.redditor(username)
+    destination.message(f"Subscribed redditors activity the last {ACTIVITY_AGE_DAYS} day(s)", message)
+
+
 def run_script():
     minimum_utc = get_minimum_utc()
-
+    # For each user group its subscriptions into redditors and query their activity, compose and send the message
     for user in mongodb_utils.get_users(db):
         redditors_activity = []
-        for redditor_username, subscriptions in groupby(user['subscriptions'], key=lambda x: x['username']):
+        subscription_removed = False
+        for redditor_username, subscriptions_by_redditor in groupby(user['subscriptions'], key=lambda x: x['username']):
+            subscription_removed = False
             redditor = reddit.redditor(redditor_username)
+            subscriptions = [subscription for subscription in subscriptions_by_redditor]
             subreddits = [subscription['subreddit'] for subscription in subscriptions]
-            redditors_activity.append((redditor,
-                                       get_comments_from_redditor(redditor, subreddits, minimum_utc),
-                                       get_submissions_from_redditor(redditor, subreddits, minimum_utc)))
-        message = compose_message(redditors_activity)
-        destination = reddit.redditor(user['username'])
-        destination.message(f"Subscribed redditors activity the last {activity_age_days} day(s)", message)
+            try:
+                redditors_activity.append((
+                    redditor,
+                    reddit_utils.get_comments_from_redditor(redditor, subreddits, minimum_utc),
+                    reddit_utils.get_submissions_from_redditor(redditor, subreddits, minimum_utc)))
+            # If we got a 404 querying the comments or submissions the redditor doesn't exist, let's
+            # remove the subscriptions that share this redditor and persist the new user subscriptions
+            except NotFound:
+                user['subscriptions'] = [e for e in user['subscriptions'] if e not in subscriptions]
+                mongodb_utils.persist_user(db, user)
+                subscription_removed = True
+        send_message(redditors_activity, subscription_removed, user['username'])
 
 
 if __name__ == "__main__":
