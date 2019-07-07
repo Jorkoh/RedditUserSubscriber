@@ -5,10 +5,10 @@ import os
 def reddit_login():
     print("Logging into Reddit..")
 
-    reddit = praw.Reddit(username=os.environ['username'],
-                         password=os.environ['password'],
-                         client_id=os.environ['client_id'],
-                         client_secret=os.environ['client_secret'],
+    reddit = praw.Reddit(username=os.environ['USERNAME'],
+                         password=os.environ['PASSWORD'],
+                         client_id=os.environ['CLIENT_ID'],
+                         client_secret=os.environ['CLIENT_SECRET'],
                          user_agent='UserSubscriberBot by /u/Kohru')
 
     print("Logged into Reddit!")

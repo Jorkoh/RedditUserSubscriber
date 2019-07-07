@@ -5,11 +5,11 @@ from prawcore.exceptions import NotFound
 
 from Scripts import reddit_utils, mongodb_utils
 
-ACTIVITY_AGE_DAYS = int(os.environ["activity_age_days"])
+SEND_PERIOD_DAYS = int(os.environ["SEND_PERIOD_DAYS"])
 
 
 def get_minimum_utc():
-    return (datetime.now() - timedelta(days=ACTIVITY_AGE_DAYS)).timestamp()
+    return (datetime.now() - timedelta(days=SEND_PERIOD_DAYS)).timestamp()
 
 
 def compose_message(redditors_and_comments):
@@ -43,7 +43,8 @@ def send_message(redditors_activity, subscription_removed, username):
     if subscription_removed:
         message += "One or more subscriptions have been removed because the redditor doesn't exist."
     destination = reddit.redditor(username)
-    destination.message(f"Subscribed redditors activity the last {ACTIVITY_AGE_DAYS} day(s)", message)
+    destination.message(f"Subscribed redditors activity the last {SEND_PERIOD_DAYS} day(s)", message)
+    print(f"Sent subscription message for {username}")
 
 
 def run_script():
@@ -52,10 +53,10 @@ def run_script():
     for user in mongodb_utils.get_users(db):
         redditors_activity = []
         subscription_removed = False
-        for redditor_username, subscriptions_by_redditor in groupby(user['subscriptions'], key=lambda x: x['username']):
+        for redditor_username, subscriptions_by_redditor in groupby(user['subscriptions'], lambda x: x['username']):
             subscription_removed = False
             redditor = reddit.redditor(redditor_username)
-            subscriptions = [subscription for subscription in subscriptions_by_redditor]
+            subscriptions = list(subscriptions_by_redditor)
             subreddits = [subscription['subreddit'] for subscription in subscriptions]
             try:
                 redditors_activity.append((
@@ -73,5 +74,6 @@ def run_script():
 
 if __name__ == "__main__":
     db = mongodb_utils.login()
-    reddit = reddit_utils.reddit_login()
-    run_script()
+    if mongodb_utils.is_time_to_send_feeds(db):
+        reddit = reddit_utils.reddit_login()
+        run_script()

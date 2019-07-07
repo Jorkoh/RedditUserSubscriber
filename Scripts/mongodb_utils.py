@@ -19,6 +19,11 @@ def login():
     return db
 
 
+def is_time_to_send_feeds(db):
+    db['Counters'].update({'name': "daysSinceLastSend"}, {"$inc": {"days": 1}})
+    return db['Counters'].find_one({'name': "daysSinceLastSend"})["days"] == int(os.environ['SEND_PERIOD_DAYS'])
+
+
 def get_users(db):
     return db['Users'].find()
 

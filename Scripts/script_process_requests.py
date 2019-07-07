@@ -28,6 +28,7 @@ def manage_add_subscriptions(message):
             subscription = {'username': redditor, 'subreddit': subreddit}
             if subscription not in user['subscriptions']:
                 user['subscriptions'].append(subscription)
+                user['subscriptions'].sort(key=lambda x: x['username'])
                 new_subscriptions_counter += 1
         mongodb_utils.persist_user(db, user)
 
@@ -70,15 +71,15 @@ def manage_remove_subscriptions(message):
 
 
 def manage_unrecognized_message(message):
-    message.reply('Command not recognized, check how this bot works '
-                  'at [github](https://github.com/Jorkoh/RedditUserSubscriber)')
+    message.reply(f'Command \"{message.subject}\" not recognized, check how this bot works '
+                  'at [github](https://github.com/Jorkoh/RedditUserSubscriber).')
+    print(f"Command not recognized for {message.author.name}")
 
 
 def run_script():
-    unread_messages = []
-    for new_message in reddit.inbox.unread(limit=None):
-        unread_messages.append(new_message)
-
+    unread_messages = list(reddit.inbox.unread(limit=None))
+    print(f"Processing {len(unread_messages)} new messages..")
+    for new_message in unread_messages:
         if new_message.subject == "Add subscriptions":
             manage_add_subscriptions(new_message)
         elif new_message.subject == "Check subscriptions":
