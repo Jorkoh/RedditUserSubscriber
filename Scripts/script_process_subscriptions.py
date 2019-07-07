@@ -17,7 +17,7 @@ def manage_check_subscriptions(message):
     print(f"Checked subscriptions for {message.author.name}")
 
 
-def manage_new_subscriptions(message):
+def manage_add_subscriptions(message):
     try:
         username = message.author.name
 
@@ -83,8 +83,8 @@ def run_script():
     for new_message in reddit.inbox.unread(limit=None):
         unread_messages.append(new_message)
 
-        if new_message.subject == "New subscriptions":
-            manage_new_subscriptions(new_message)
+        if new_message.subject == "Add subscriptions":
+            manage_add_subscriptions(new_message)
         elif new_message.subject == "Check subscriptions":
             manage_check_subscriptions(new_message)
         elif new_message.subject == "Remove subscriptions":

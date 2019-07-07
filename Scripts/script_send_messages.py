@@ -5,8 +5,6 @@ from itertools import groupby
 from Scripts import reddit_utils, mongodb_utils
 
 # TODO: Test on Heroku
-# TODO: DM handling for removing subscriptions, checking subscription
-# TODO: Documentation
 
 activity_age_days = int(os.environ["activity_age_days"])
 
